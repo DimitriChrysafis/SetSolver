@@ -36,31 +36,6 @@ def find_cards(img):
     return cards
 
 
-def find_shapes(image):
-    num_shapes = {"squiggles": 0, "diamonds": 0, "ovals": 0}
-
-    blur_img = cv2.blur(image, (3, 3))
-    gray_img = cv2.cvtColor(blur_img, cv2.COLOR_BGR2GRAY)
-    thr_image = cv2.Canny(gray_img, 40, 210, apertureSize=3)
-    thr_image = cv2.dilate(thr_image, np.ones((3, 3), np.uint8))
-    contours, _ = cv2.findContours(thr_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    for cnt in contours:
-        if cv2.contourArea(cnt) > 500:
-            cv2.drawContours(card_img, [cnt], 0, (0, 255, 0), 1)
-            epsilon = 0.01 * cv2.arcLength(cnt, True)
-            approx = cv2.approxPolyDP(cnt, epsilon, True)
-            if approx.shape[0] < 9:
-                num_shapes["diamonds"] += 1
-            elif approx.shape[0] > 12:
-                num_shapes["squiggles"] += 1
-            else:
-                num_shapes["ovals"] += 1
-
-    total_num_shapes = num_shapes["ovals"] + num_shapes["squiggles"] + num_shapes["diamonds"]
-    shape_type = max(num_shapes.items(), key=operator.itemgetter(1))[0]
-    shapes = namedtuple("shapes", ["type", "number", "color", "shade"])
-    return shapes(shape_type, total_num_shapes, "UNKNOWN", "UNKNOWN")
-
 if __name__ == '__main__':
     from glob import glob
     save_folder = "/Users/dimitrichrysafis/PycharmProjects/setSolverCV/cards"
